@@ -1,9 +1,15 @@
+from django.db import router
 from django.urls import path
 from django.urls.conf import path, re_path
+from django.views.generic import TemplateView
 from . import views
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', TemplateView.as_view(template_name='index.html'), name='index'),
     path('topics/', views.topics, name='topics'),
     re_path(r'^topics/(?P<topic_id>\d+)/$', views.topic, name='topic'),
     path('new_topic/', views.new_topic, name='new_topic'),

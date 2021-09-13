@@ -1,13 +1,20 @@
-from django.http.response import Http404
+from django.http.response import Http404, HttpResponse
 from learning_logs.form import EntryForm, TopicForm
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
+# from django.contrib.auth.decorators import login_required
+
+from learning_logs.serializer import TopicSerializer
+from rest_framework import viewsets
 
 from .models import Topic, Entry
 
 # Create your views here.
+
+class TopicViewSet(viewsets.ModelViewSet):
+    queryset = Topic.objects.order_by('date_added')
+    serializer_class = TopicSerializer
 
 
 def index(request):
@@ -15,15 +22,17 @@ def index(request):
     return render(request, 'learning_logs/index.html')
 
 
-@login_required
+# @login_required
 def topics(request):
     """显示所有主题"""
-    topics = Topic.objects.filter(owner=request.user).order_by('date_added')
-    context = {'topics': topics}
-    return render(request, 'learning_logs/topics.html', context)
+    # topics = Topic.objects.filter(owner=request.user).order_by('date_added')
+    # context = {'topics': topics}
+    # return render(request, 'learning_logs/topics.html', context)
+    topics = list(Topic.objects.order_by('date_added'))
+    return JsonResponse({'topics': topics}, content_type="application/json")
 
 
-@login_required
+# @login_required
 def topic(request, topic_id):
     """显示单个主题极其所有条目"""
     topic = Topic.objects.get(id=topic_id)
@@ -34,7 +43,7 @@ def topic(request, topic_id):
     return render(request, 'learning_logs/topic.html', context)
 
 
-@login_required
+# @login_required
 def new_topic(request):
     """添加新主题"""
     if request.method != "POST":
@@ -51,7 +60,7 @@ def new_topic(request):
     return render(request, 'learning_logs/new_topic.html', context)
 
 
-@login_required
+# @login_required
 def new_entry(request, topic_id):
     """在特定的主题中添加新条目"""
     topic = Topic.objects.get(id=topic_id)
@@ -71,7 +80,7 @@ def new_entry(request, topic_id):
     return render(request, 'learning_logs/new_entry.html', context)
 
 
-@login_required
+# @login_required
 def edit_entry(request, entry_id):
     """编辑既有条目"""
     entry = Entry.objects.get(id=entry_id)
@@ -92,7 +101,7 @@ def edit_entry(request, entry_id):
     return render(request, 'learning_logs/edit_entry.html', context)
 
 
-@login_required
+# @login_required
 def delete_entry(request, entry_id):
     """删除既有条目"""
     entry = Entry.objects.get(id=entry_id)
